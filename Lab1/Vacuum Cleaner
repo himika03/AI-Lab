@@ -1,0 +1,33 @@
+def show_rooms_status(rooms):
+    for room_number, status in rooms.items():
+        print(f"Room {room_number}: {'Clean' if status else 'Dirty'}")
+
+def clean_room(rooms, room_number):
+    if rooms[room_number]:
+        print(f"Room {room_number} is already clean.")
+    else:
+        print(f"Cleaning room {room_number}...")
+        rooms[room_number] = True
+        print(f"Room {room_number} is now clean!")
+
+def clean_all_rooms(rooms):
+    print("Initial room statuses:")
+    show_rooms_status(rooms)
+    print("\nStarting cleaning process...\n")
+    for room_number in rooms:
+        clean_room(rooms, room_number)
+        print()  
+    print("Final room statuses:")
+    show_rooms_status(rooms)
+
+if __name__ == "__main__":
+    rooms = {
+        1: False,
+        2: True,
+        3: False,
+        4: False
+    }
+    clean_all_rooms(rooms)
+
+
+
