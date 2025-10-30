@@ -1,0 +1,88 @@
+import math
+import copy
+
+# Goal configuration
+GOAL_STATE = [[1, 2, 3],
+              [4, 5, 6],
+              [7, 8, 0]]  # 0 = blank
+
+def print_board(state):
+    for row in state:
+        print(row)
+    print()
+
+def is_goal(state):
+    return state == GOAL_STATE
+
+def misplaced_tiles(state):
+    """Heuristic: number of misplaced tiles (ignores the blank)."""
+    count = 0
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] != 0 and state[i][j] != GOAL_STATE[i][j]:
+                count += 1
+    return count
+
+def get_blank(state):
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] == 0:
+                return i, j
+
+def get_possible_moves(state):
+    """Generate all valid moves (swap blank with neighbor)."""
+    x, y = get_blank(state)
+    moves = []
+    directions = [(1,0), (-1,0), (0,1), (0,-1)]  # Down, Up, Right, Left
+    for dx, dy in directions:
+        nx, ny = x + dx, y + dy
+        if 0 <= nx < 3 and 0 <= ny < 3:
+            new_state = copy.deepcopy(state)
+            new_state[x][y], new_state[nx][ny] = new_state[nx][ny], new_state[x][y]
+            moves.append(new_state)
+    return moves
+
+def minimax(state, depth, maximizing_player):
+    """
+    Minimax for 8-puzzle.
+    maximizing_player: True -> opponent (makes it worse)
+                       False -> player (makes it better)
+    """
+    if depth == 0 or is_goal(state):
+        # Evaluation: we return negative of heuristic (lower is better)
+        return -misplaced_tiles(state), state
+
+    if maximizing_player:
+        best_value = -math.inf
+        best_state = None
+        for child in get_possible_moves(state):
+            value, _ = minimax(child, depth - 1, False)
+            if value > best_value:
+                best_value = value
+                best_state = child
+        return best_value, best_state
+    else:
+        best_value = math.inf
+        best_state = None
+        for child in get_possible_moves(state):
+            value, _ = minimax(child, depth - 1, True)
+            if value < best_value:
+                best_value = value
+                best_state = child
+        return best_value, best_state
+
+# ----- DEMO -----
+if __name__ == "__main__":
+    start_state = [[1, 2, 3],
+                   [4, 0, 6],
+                   [7, 5, 8]]
+
+    print("Initial state:")
+    print_board(start_state)
+
+    # Run minimax for a few levels (e.g., depth = 3)
+    value, next_state = minimax(start_state, depth=3, maximizing_player=False)
+
+    print("Best evaluation value:", value)
+    print("Next chosen state by Minimax:")
+    print_board(next_state)
