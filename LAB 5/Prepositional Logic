@@ -1,0 +1,54 @@
+import itertools
+import pandas as pd
+
+# Define propositional variables
+variables = ['A', 'B', 'C']
+
+# Generate all combinations of truth values
+combinations = list(itertools.product([False, True], repeat=len(variables)))
+
+rows = []
+
+for vals in combinations:
+    A, B, C = vals
+
+    # --- Knowledge Base ---
+    # KB = (A ∨ C) ∧ (B ∨ ¬C)
+    KB = (A or C) and (B or not C)
+   
+    # --- Query ---
+    # α = A ∨ B
+    alpha = A or B
+
+    # --- Check entailment condition ---
+    # KB ⊨ α  <=>  In all models where KB is true, α must also be true
+    rows.append({
+        'A': A,
+        'B': B,
+        'C': C,
+        '(A ∨ C)': (A or C),
+        '(B ∨ ¬C)': (B or not C),
+        'KB True?': KB,
+        'α = (A ∨ B)': alpha
+    })
+
+# Create a DataFrame for a neat truth table
+df = pd.DataFrame(rows)
+
+print("=== Truth Table for Knowledge Base and Query ===\n")
+print(df.to_string(index=False))
+
+# Find models where KB is true
+models_true = df[df['KB True?'] == True]
+
+# Check if α is true in all models where KB is true
+entailment = all(models_true['α = (A ∨ B)'])
+
+print("\n=== Models where KB is True ===")
+print(models_true[['A', 'B', 'C']])
+
+print("\nEntailment Check:")
+if entailment:
+    print("yes B ⊨ α  (Knowledge Base entails α)")
+else:
+    print("no B ⊭ α  (Knowledge Base does NOT entail α)")
