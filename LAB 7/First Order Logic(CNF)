@@ -1,0 +1,59 @@
+# -----------------------------------------------------
+# CNF Converter - Works in any online compiler (No imports)
+# Supports operators: ->, ~, |, &
+# -----------------------------------------------------
+
+def remove_implications(expr):
+    """Replace implications (A -> B) with (~A | B)."""
+    result = ""
+    i = 0
+    while i < len(expr):
+        if i + 1 < len(expr) and expr[i:i+2] == "->":
+            result += "|"
+            i += 2
+        else:
+            result += expr[i]
+            i += 1
+    return result
+
+def apply_demorgan(expr):
+    """Apply simple De Morgan’s laws and double negation."""
+    # Double negation
+    while "~~" in expr:
+        expr = expr.replace("~~", "")
+
+    # De Morgan's rules (very simple replacement)
+    expr = expr.replace("~(A&B)", "(~A|~B)")
+    expr = expr.replace("~(A|B)", "(~A&~B)")
+    return expr
+
+def distribute_or_over_and(expr):
+    """Distribute OR over AND for simple patterns."""
+    # (A | (B & C)) = ((A | B) & (A | C))
+    while "(A|(B&C))" in expr or "((B&C)|A)" in expr:
+        expr = expr.replace("(A|(B&C))", "((A|B)&(A|C))")
+        expr = expr.replace("((B&C)|A)", "((B|A)&(C|A))")
+    return expr
+
+def to_cnf(expr):
+    """Convert a given expression to CNF (simplified)."""
+    expr = expr.replace(" ", "")  # remove spaces
+    expr = remove_implications(expr)
+    expr = apply_demorgan(expr)
+    expr = distribute_or_over_and(expr)
+    return expr
+
+# -----------------------------------------------------
+# MAIN PROGRAM
+# -----------------------------------------------------
+
+print("=== CNF Converter ===")
+print("Use symbols: -> for implies, ~ for NOT, | for OR, & for AND")
+print("Example: (A->(B&C)) or ~(A->(B|C))\n")
+
+expression = input("Enter logical expression: ")
+
+cnf_result = to_cnf(expression)
+
+print("\nOriginal Expression:", expression)
+print("CNF Form:", cnf_result)
